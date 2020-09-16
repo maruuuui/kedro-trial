@@ -48,6 +48,10 @@ class ProjectHooks:
         de_pipeline = de.create_pipeline()
         ds_pipeline = ds.create_pipeline()
 
+        # return {
+        #     "de": de_pipeline,
+        #     "__default__": de_pipeline,
+        # }
         return {
             "de": de_pipeline,
             "ds": ds_pipeline,

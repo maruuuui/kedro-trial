@@ -1,76 +1,83 @@
 import pandas as pd
+from sklearn.compose import ColumnTransformer, make_column_transformer
+from sklearn.impute import SimpleImputer
+from sklearn.pipeline import Pipeline
+from sklearn.preprocessing import LabelEncoder, OneHotEncoder, StandardScaler
 
 
-def _is_true(x):
-    return x == "t"
-
-
-def _parse_percentage(x):
-    if isinstance(x, str):
-        return float(x.replace("%", "")) / 100
-    return float("NaN")
-
-
-def _parse_money(x):
-    return float(x.replace("$", "").replace(",", ""))
-
-
-def preprocess_companies(companies: pd.DataFrame) -> pd.DataFrame:
-    """Preprocess the data for companies.
+def drop_unused_col(customers: pd.DataFrame) -> pd.DataFrame:
+    """不要な列(ID)を削除する
 
         Args:
-            companies: Source data.
+            customers: Source data.
         Returns:
             Preprocessed data.
 
     """
 
-    companies["iata_approved"] = companies["iata_approved"].apply(_is_true)
+    # drop()メソッドは指定した部分を削除したデータを返す
+    # 呼ぶだけでは元データに影響を与えないことに注意
+    customers = customers.drop(["ID"], axis=1)
 
-    companies["company_rating"] = companies["company_rating"].apply(_parse_percentage)
-
-    return companies
+    return customers
 
 
-def preprocess_shuttles(shuttles: pd.DataFrame) -> pd.DataFrame:
-    """Preprocess the data for shuttles.
+def impute_missing_value(customers: pd.DataFrame) -> pd.DataFrame:
+    """欠損値を補完する
 
         Args:
-            shuttles: Source data.
+            customers: Source data.
         Returns:
             Preprocessed data.
-
     """
-    shuttles["d_check_complete"] = shuttles["d_check_complete"].apply(_is_true)
+    columns = customers.columns
+    imputer = SimpleImputer(strategy="most_frequent")
 
-    shuttles["moon_clearance_complete"] = shuttles["moon_clearance_complete"].apply(
-        _is_true
-    )
+    imputer = imputer.fit(customers.values)
 
-    shuttles["price"] = shuttles["price"].apply(_parse_money)
+    imputed_data = imputer.transform(customers.values)
+    # print(imputed_data)
 
-    return shuttles
+    # SimpleImputerで補完されたデータはNumPy配列なのでDataFrameに変換
+    imputed_data_df = pd.DataFrame(imputed_data)
+    # 列名の設定
+    imputed_data_df.columns = columns
+    # print(imputed_data_df)
+    return imputed_data_df
 
 
-def create_master_table(
-    shuttles: pd.DataFrame, companies: pd.DataFrame, reviews: pd.DataFrame
-) -> pd.DataFrame:
-    """Combines all data to create a master table.
+def categorical_transform(customers: pd.DataFrame) -> pd.DataFrame:
+    """カテゴリー・データが含まれる列を指定して、数値型の列に変換する
 
         Args:
-            shuttles: Preprocessed data for shuttles.
-            companies: Preprocessed data for companies.
-            reviews: Source data for reviews.
+            customers: Source data.
         Returns:
-            Master table.
-
+            Preprocessed data.
     """
-    rated_shuttles = shuttles.merge(reviews, left_on="id", right_on="shuttle_id")
+    # デバッグ用.DataFrameを全列表示させるように設定
+    pd.set_option("display.max_columns", 100)
 
-    with_companies = rated_shuttles.merge(
-        companies, left_on="company_id", right_on="id"
-    )
+    # "GENDER"を"F","M"から整数(0,1)に変換
+    gender_mapping = {"F": 0, "M": 1}
+    customers["GENDER"] = customers["GENDER"].map(gender_mapping)
+    # print(customers["GENDER"])
+    # "HOMEOWNER"を"N","Y"から整数(0,1)に変換
+    homeowner_mapping = {"N": 0, "Y": 1}
+    customers["HOMEOWNER"] = customers["HOMEOWNER"].map(homeowner_mapping)
+    # print(customers["HOMEOWNER"])
 
-    master_table = with_companies.drop(["shuttle_id", "company_id"], axis=1)
-    master_table = master_table.dropna()
-    return master_table
+    # "CHURNRISK"を整数に変換
+    churnrisk_mapping = {"High": 0, "Low": 1, "Medium": 2}
+    customers["CHURNRISK"] = customers["CHURNRISK"].map(churnrisk_mapping)
+
+    # "STATUS"のダミーラベル化
+    categoricalColumns = ["STATUS"]
+    dummy_coded_data = pd.get_dummies(customers[categoricalColumns])
+    # print(dummy_coded_data)
+
+    customers = customers.drop(categoricalColumns, axis=1)
+    transformed_customers = pd.concat([customers, dummy_coded_data], axis=1)
+    # print(transformed_customers)
+
+    return transformed_customers
+

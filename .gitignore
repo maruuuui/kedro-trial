@@ -149,10 +149,11 @@ venv/
 ENV/
 env.bak/
 venv.bak/
+.vscode/
 
 # mkdocs documentation
 /site
 
 # mypy
 .mypy_cache/
-.vscode/settings.json
+

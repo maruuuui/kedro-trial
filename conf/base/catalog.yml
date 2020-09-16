@@ -43,41 +43,68 @@
 # This is a data set used by the "Hello World" example pipeline provided with the project
 # template. Please feel free to remove it once you remove the example pipeline.
 
-example_iris_data:
-  type: pandas.CSVDataSet
-  filepath: data/01_raw/iris.csv
+# example_iris_data:
+#   type: pandas.CSVDataSet
+#   filepath: data/01_raw/iris.csv
 
-companies:
+# companies:
+#   type: pandas.CSVDataSet
+#   filepath: data/01_raw/companies.csv
+#   layer: raw
+
+# reviews:
+#   type: pandas.CSVDataSet
+#   filepath: data/01_raw/reviews.csv
+#   layer: raw
+
+# shuttles:
+#   type: pandas.ExcelDataSet
+#   filepath: data/01_raw/shuttles.xlsx
+#   layer: raw
+
+# preprocessed_companies:
+#   type: pandas.CSVDataSet
+#   filepath: data/02_intermediate/preprocessed_companies.csv
+#   layer: intermediate
+customers:
   type: pandas.CSVDataSet
-  filepath: data/01_raw/companies.csv
+  filepath: data/01_raw/customers.csv
   layer: raw
 
-reviews:
+preprocessed_customers:
   type: pandas.CSVDataSet
-  filepath: data/01_raw/reviews.csv
-  layer: raw
-
-shuttles:
-  type: pandas.ExcelDataSet
-  filepath: data/01_raw/shuttles.xlsx
-  layer: raw
-
-preprocessed_companies:
+  filepath: data/02_intermediate/preprocessed_customers.csv
+  layer: intermediate
+X_train:
   type: pandas.CSVDataSet
-  filepath: data/02_intermediate/preprocessed_companies.csv
+  filepath: data/02_intermediate/X_train.csv
   layer: intermediate
 
-preprocessed_shuttles:
+X_test:
   type: pandas.CSVDataSet
-  filepath: data/02_intermediate/preprocessed_shuttles.csv
+  filepath: data/02_intermediate/X_test.csv
   layer: intermediate
 
-master_table:
+y_train:
   type: pandas.CSVDataSet
-  filepath: data/03_primary/master_table.csv
-  layer: primary
+  filepath: data/02_intermediate/y_train.csv
+  layer: intermediate
 
-regressor:
+y_test:
+  type: pandas.CSVDataSet
+  filepath: data/02_intermediate/y_test.csv
+  layer: intermediate
+# preprocessed_shuttles:
+#   type: pandas.CSVDataSet
+#   filepath: data/02_intermediate/preprocessed_shuttles.csv
+#   layer: intermediate
+
+# master_table:
+#   type: pandas.CSVDataSet
+#   filepath: data/03_primary/master_table.csv
+#   layer: primary
+
+rfc_model:
   type: pickle.PickleDataSet
   filepath: data/06_models/regressor.pickle
   versioned: true

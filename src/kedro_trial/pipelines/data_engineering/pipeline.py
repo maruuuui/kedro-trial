@@ -32,11 +32,12 @@ just for illustrating basic Kedro features.
 Delete this when you start working on your own Kedro project.
 """
 
-from kedro.pipeline import node, Pipeline
+from kedro.pipeline import Pipeline, node
+
 from kedro_trial.pipelines.data_engineering.nodes import (
-    preprocess_companies,
-    preprocess_shuttles,
-    create_master_table,
+    categorical_transform,
+    drop_unused_col,
+    impute_missing_value,
 )
 
 
@@ -44,22 +45,29 @@ def create_pipeline(**kwargs):
     return Pipeline(
         [
             node(
-                func=preprocess_companies,
-                inputs="companies",
-                outputs="preprocessed_companies",
-                name="preprocessing_companies",
+                func=drop_unused_col,
+                inputs="customers",
+                outputs="tmp1",
+                name="drop_unused_col",
             ),
             node(
-                func=preprocess_shuttles,
-                inputs="shuttles",
-                outputs="preprocessed_shuttles",
-                name="preprocessing_shuttles",
+                func=impute_missing_value,
+                inputs="tmp1",
+                outputs="tmp2",
+                name="impute_missing_value",
             ),
             node(
-                func=create_master_table,
-                inputs=["preprocessed_shuttles", "preprocessed_companies", "reviews"],
-                outputs="master_table",
-                name="master_table",
+                func=categorical_transform,
+                inputs="tmp2",
+                outputs="preprocessed_customers",
+                name="categorical_transform",
             ),
+            # node(
+            #     func=label_encode,
+            #     inputs="tmp3",
+            #     outputs="tmp4",
+            #     name="numerical_transformer",
+            # ),
         ]
     )
+
